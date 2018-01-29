@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.bonrita.ugmusic">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".ui.MusicPlayerActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- Use this intent filter to get voice searches, like "Play The Beatles" -->
+            <intent-filter>
+                <action android:name="android.media.action.MEDIA_PLAY_FROM_SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- Main music service, provides media browsing and media playback services to consumers
+        through MediaBrowserService and MediaSession. Consumers connect to it through
+        MediaBrowser (for browsing) and MediaController (for play session control)
+        -->
+        <service android:name=".MusicService"
+            tools:ignore="ExportedService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
+
+        <!-- A receiver that will receive media buttons and send as intents to your
+        MediaBrowserServiceCompat implementation.
+        Required on pre-Lollipop. More information at
+        http://developer.android.com/reference/android/support/v4/media/session/MediaButtonReceiver.html
+        -->
+        <receiver android:name="android.support.v4.media.session.MediaButtonReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>

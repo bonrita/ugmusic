@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Ug Music</string>
+    <string name="error_loading_media">Error Loading Media</string>
+    <string name="browse_genres">Genres</string>
+    <string name="browse_genre_subtitle">Songs by genre</string>
+    <string name="browse_by_artists">Artists</string>
+    <string name="browse_artists_subtitle">Songs by artists</string>
+</resources>
