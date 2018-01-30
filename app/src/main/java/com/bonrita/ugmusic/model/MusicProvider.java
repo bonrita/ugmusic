@@ -37,6 +37,7 @@ public class MusicProvider {
     private ConcurrentMap<String, MutableMediaMetadata> mMusicListById;
 
     private Set<String> mFavoriteTracks;
+    private ConcurrentMap<String, List<MediaMetadataCompat>> mMusicListByArtist;
 
     enum State {
         NON_INITIALIZED, INITIALIZING, INITIALIZED
@@ -147,6 +148,7 @@ public class MusicProvider {
                     mMusicListById.put(musicId, new MutableMediaMetadata(musicId, item));
                 }
                 buildListsByGenre();
+                buildListByArtists();
                 mCurrentState = State.INITIALIZED;
             }
         } finally {
@@ -156,7 +158,23 @@ public class MusicProvider {
                 mCurrentState = State.NON_INITIALIZED;
             }
         }
+    }
 
+    private synchronized void buildListByArtists() {
+        ConcurrentMap<String, List<MediaMetadataCompat>> newMusicListByArtists = new ConcurrentHashMap<>();
+
+        for (MutableMediaMetadata m : mMusicListById.values()) {
+            String artist = m.metaData.getString(MediaMetadataCompat.METADATA_KEY_ARTIST);
+            List<MediaMetadataCompat> list = newMusicListByArtists.get(artist);
+
+            if (list == null) {
+                list = new ArrayList<>();
+                newMusicListByArtists.put(artist, list);
+            }
+
+            list.add(m.metaData);
+        }
+        mMusicListByArtist = newMusicListByArtists;
     }
 
     public interface Callback {

@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -35,6 +36,8 @@ import java.util.List;
 public class MediaBrowserFragment extends Fragment {
     private static final String TAG = LogHelper.makeLogTag(MediaBrowserFragment.class);
 
+    private static final String ARG_MEDIA_ID = "media_id";
+
     private String mMediaId;
 
     private TextView mErrorMessage;
@@ -43,6 +46,7 @@ public class MediaBrowserFragment extends Fragment {
     private ArrayAdapter<MediaBrowserCompat.MediaItem> mBrowserAdapter;
 
     private MediaBrowserProvider mMediaBrowserProvider;
+    private  MediaFragmentListener mMediaFragmentListener;
     private final MediaBrowserCompat.SubscriptionCallback mSubscriptionCallback = new MediaBrowserCompat.SubscriptionCallback() {
 
         @Override
@@ -103,10 +107,16 @@ public class MediaBrowserFragment extends Fragment {
         mErrorView = rootView.findViewById(R.id.playback_error);
         mErrorMessage = mErrorView.findViewById(R.id.error_message);
 
-
         mBrowserAdapter = new BrowserAdapter(getActivity());
         ListView listView = (ListView) rootView.findViewById(R.id.list_view);
         listView.setAdapter(mBrowserAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                MediaBrowserCompat.MediaItem item = (MediaBrowserCompat.MediaItem) parent.getItemAtPosition(position);
+                mMediaFragmentListener.onMediaItemSelected(item);
+            }
+        });
 
         return rootView;
     }
@@ -120,7 +130,7 @@ public class MediaBrowserFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mMediaBrowserProvider = (MediaBrowserProvider) context;
+        mMediaFragmentListener = (MediaFragmentListener) context;
     }
 
     /**
@@ -141,18 +151,24 @@ public class MediaBrowserFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        MediaBrowserCompat mediaBrowser = mMediaBrowserProvider.getMediaBrowser();
+        MediaBrowserCompat mediaBrowser = mMediaFragmentListener.getMediaBrowser();
         if (mediaBrowser != null && mediaBrowser.isConnected() && mMediaId != null) {
             Log.i(TAG, "Un-subscribing Media ID = " + mMediaId);
             mediaBrowser.unsubscribe(mMediaId);
         }
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mMediaFragmentListener = null;
+    }
+
     public void onConnected() {
-        mMediaId = mMediaBrowserProvider.getMediaBrowser().getRoot();
+        mMediaId = mMediaFragmentListener.getMediaBrowser().getRoot();
         Log.i(TAG, "Media ID = " + mMediaId);
-        mMediaBrowserProvider.getMediaBrowser().unsubscribe(mMediaId);
-        mMediaBrowserProvider.getMediaBrowser().subscribe(mMediaId, mSubscriptionCallback);
+        mMediaFragmentListener.getMediaBrowser().unsubscribe(mMediaId);
+        mMediaFragmentListener.getMediaBrowser().subscribe(mMediaId, mSubscriptionCallback);
     }
 
     private void checkForUserVisibleErrors(boolean forceError) {
@@ -162,6 +178,22 @@ public class MediaBrowserFragment extends Fragment {
         }
 
         mErrorView.setVisibility(forceError ? View.VISIBLE : View.GONE);
+    }
+
+    // Save the current media ID so that we can track it in the application.
+    public void setMediaId(String mediaId) {
+        Bundle args = new Bundle(1);
+        args.putString(MediaBrowserFragment.ARG_MEDIA_ID, mediaId);
+        setArguments(args);
+    }
+
+    public String getMediaId() {
+        Bundle args = getArguments();
+
+        if (args != null) {
+            return args.getString(MediaBrowserFragment.ARG_MEDIA_ID);
+        }
+        return null;
     }
 
     private class BrowserAdapter extends ArrayAdapter<MediaBrowserCompat.MediaItem> {
@@ -182,4 +214,7 @@ public class MediaBrowserFragment extends Fragment {
         }
     }
 
+    public interface MediaFragmentListener extends MediaBrowserProvider {
+        void onMediaItemSelected(MediaBrowserCompat.MediaItem item);
+    }
 }

@@ -2,14 +2,18 @@ package com.bonrita.ugmusic.ui;
 
 import android.animation.Animator;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.AnimatorRes;
 import android.support.annotation.Nullable;
+import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.MediaController;
@@ -24,7 +28,7 @@ import com.bonrita.ugmusic.utils.LogHelper;
  * When it is created and connected/disconnect on start/stop.
  * Thus, a MediaBrowser will be always connected while this activity is running.
  */
-public class MusicPlayerActivity extends BaseActivity {
+public class MusicPlayerActivity extends BaseActivity implements MediaBrowserFragment.MediaFragmentListener {
 
     private static final String TAG = LogHelper.makeLogTag(MusicPlayerActivity.class);
     private static final String FRAGMENT_TAG = "ugmp_list_container";
@@ -56,11 +60,33 @@ public class MusicPlayerActivity extends BaseActivity {
     }
 
     private void navigateToBrowser(String mediaId) {
-        FragmentManager fragmentManager = getFragmentManager();
-        MediaBrowserFragment fragment = new MediaBrowserFragment();
+        MediaBrowserFragment fragment = getBrowseFragment();
 
-        fragmentManager.beginTransaction().replace(R.id.container, fragment, FRAGMENT_TAG).commit();
-//                .setCustomAnimations(R.animator.slide_in_from_right).commit();
+        if (fragment == null || !TextUtils.equals(mediaId, fragment.getMediaId())) {
+
+            fragment = new MediaBrowserFragment();
+
+            // Save the media ID so that we can trace it in the application.
+            fragment.setMediaId(mediaId);
+
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            transaction.replace(R.id.container, fragment, FRAGMENT_TAG)
+                    .setCustomAnimations(R.animator.slide_in_from_right, R.animator.slide_in_from_left
+                            , R.animator.slide_in_from_right, R.animator.slide_in_from_left);
+
+            if (mediaId != null) {
+                // This back stack is managed by the activity and allows the user to return
+                // to the previous fragment state, by pressing the Back button.
+                // By calling addToBackStack(), the replace transaction is saved to the back stack
+                // so the user can reverse the transaction and bring back the previous
+                // fragment by pressing the Back button.
+                // https://developer.android.com/guide/components/fragments.html
+                transaction.addToBackStack(null);
+            }
+
+            transaction.commit();
+        }
+
     }
 
     @Override
@@ -80,5 +106,12 @@ public class MusicPlayerActivity extends BaseActivity {
 
     private MediaBrowserFragment getBrowseFragment() {
         return (MediaBrowserFragment) getFragmentManager().findFragmentByTag(FRAGMENT_TAG);
+    }
+
+    @Override
+    public void onMediaItemSelected(MediaBrowserCompat.MediaItem item) {
+        if (item != null) {
+            Log.i(TAG, "Clicked media ID = " + item.getMediaId());
+        }
     }
 }
