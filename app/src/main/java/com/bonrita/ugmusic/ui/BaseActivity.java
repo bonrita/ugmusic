@@ -51,8 +51,8 @@ public abstract class BaseActivity extends AppCompatActivity implements MediaBro
 
     private void connectToSession(MediaSessionCompat.Token token) throws RemoteException {
 
-        MediaControllerCompat mediaController = new MediaControllerCompat(this, token);
-        MediaControllerCompat.setMediaController(this, mediaController);
+//        MediaControllerCompat mediaController = new MediaControllerCompat(this, token);
+//        MediaControllerCompat.setMediaController(this, mediaController);
 
         onMediaControllerConnected();
     }

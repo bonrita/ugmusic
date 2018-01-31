@@ -3,6 +3,7 @@ package com.bonrita.ugmusic.ui;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 
 import com.bonrita.ugmusic.R;
 import com.bonrita.ugmusic.utils.LogHelper;
+import com.bonrita.ugmusic.utils.NetworkHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +48,7 @@ public class MediaBrowserFragment extends Fragment {
     private ArrayAdapter<MediaBrowserCompat.MediaItem> mBrowserAdapter;
 
     private MediaBrowserProvider mMediaBrowserProvider;
-    private  MediaFragmentListener mMediaFragmentListener;
+    private MediaFragmentListener mMediaFragmentListener;
     private final MediaBrowserCompat.SubscriptionCallback mSubscriptionCallback = new MediaBrowserCompat.SubscriptionCallback() {
 
         @Override
@@ -101,11 +103,13 @@ public class MediaBrowserFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-
+        Log.i(TAG, "OnCreateView called");
         View rootView = inflater.inflate(R.layout.fragment_list, container, false);
 
         mErrorView = rootView.findViewById(R.id.playback_error);
         mErrorMessage = mErrorView.findViewById(R.id.error_message);
+
+        checkForUserVisibleErrors(false);
 
         mBrowserAdapter = new BrowserAdapter(getActivity());
         ListView listView = (ListView) rootView.findViewById(R.id.list_view);
@@ -113,6 +117,7 @@ public class MediaBrowserFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                checkForUserVisibleErrors(false);
                 MediaBrowserCompat.MediaItem item = (MediaBrowserCompat.MediaItem) parent.getItemAtPosition(position);
                 mMediaFragmentListener.onMediaItemSelected(item);
             }
@@ -130,6 +135,7 @@ public class MediaBrowserFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        Log.i(TAG, "OnAttach called");
         mMediaFragmentListener = (MediaFragmentListener) context;
     }
 
@@ -141,6 +147,12 @@ public class MediaBrowserFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        Log.i(TAG, "OnStart called");
+        MediaBrowserCompat mediaBrowser = mMediaFragmentListener.getMediaBrowser();
+
+        if (mediaBrowser != null && mediaBrowser.isConnected()) {
+            onConnected();
+        }
     }
 
     /**
@@ -151,6 +163,7 @@ public class MediaBrowserFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
+        Log.i(TAG, "OnStop called");
         MediaBrowserCompat mediaBrowser = mMediaFragmentListener.getMediaBrowser();
         if (mediaBrowser != null && mediaBrowser.isConnected() && mMediaId != null) {
             Log.i(TAG, "Un-subscribing Media ID = " + mMediaId);
@@ -160,24 +173,36 @@ public class MediaBrowserFragment extends Fragment {
 
     @Override
     public void onDetach() {
+        Log.i(TAG, "onDetach called");
         super.onDetach();
         mMediaFragmentListener = null;
     }
 
     public void onConnected() {
-        mMediaId = mMediaFragmentListener.getMediaBrowser().getRoot();
+        mMediaId = getMediaId();
+
+        if (mMediaId == null){
+            mMediaId = mMediaFragmentListener.getMediaBrowser().getRoot();
+        }
+
         Log.i(TAG, "Media ID = " + mMediaId);
         mMediaFragmentListener.getMediaBrowser().unsubscribe(mMediaId);
         mMediaFragmentListener.getMediaBrowser().subscribe(mMediaId, mSubscriptionCallback);
     }
 
     private void checkForUserVisibleErrors(boolean forceError) {
-        if (forceError) {
+        boolean showError = false;
+
+        if (!NetworkHelper.isOnline(getActivity())) {
+            showError = true;
+            mErrorMessage.setText(R.string.error_no_connection);
+        } else if (forceError) {
+            showError = true;
             // If the caller requested to show error, show a generic message:
             mErrorMessage.setText(R.string.error_loading_media);
         }
 
-        mErrorView.setVisibility(forceError ? View.VISIBLE : View.GONE);
+        mErrorView.setVisibility(showError ? View.VISIBLE : View.GONE);
     }
 
     // Save the current media ID so that we can track it in the application.

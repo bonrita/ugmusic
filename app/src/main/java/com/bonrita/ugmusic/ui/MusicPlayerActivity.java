@@ -32,6 +32,7 @@ public class MusicPlayerActivity extends BaseActivity implements MediaBrowserFra
 
     private static final String TAG = LogHelper.makeLogTag(MusicPlayerActivity.class);
     private static final String FRAGMENT_TAG = "ugmp_list_container";
+    private static final String SAVED_MEDIA_ID = "com.bonrita.ugmusic.MEDIA_ID";
     private Bundle mVoiceSearchParams;
 
     @Override
@@ -44,7 +45,21 @@ public class MusicPlayerActivity extends BaseActivity implements MediaBrowserFra
         initializeFromParams(savedInstanceState, getIntent());
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        MediaBrowserFragment fragment = getBrowseFragment();
+        if (fragment != null) {
+            String mediaId = fragment.getMediaId();
+            if(mediaId != null) {
+                outState.putString(SAVED_MEDIA_ID, mediaId);
+            }
+        }
+
+        super.onSaveInstanceState(outState);
+    }
+
     protected void initializeFromParams(Bundle savedInstanceState, Intent intent) {
+        String mediaId = null;
         // Check if we were started from a "Play XYZ" voice search. If so, we save the extras
         // (which contain the query details) in a parameter, so we can reuse it later, when the
         // MediaSession is connected.
@@ -53,9 +68,10 @@ public class MusicPlayerActivity extends BaseActivity implements MediaBrowserFra
             mVoiceSearchParams = intent.getExtras();
             LogHelper.d(TAG, "Starting from voice search query=",
                     mVoiceSearchParams.getString(SearchManager.QUERY));
+        } else if (savedInstanceState != null){
+            mediaId = savedInstanceState.getString(SAVED_MEDIA_ID);
         }
 
-        String mediaId = null;
         navigateToBrowser(mediaId);
     }
 
@@ -110,8 +126,13 @@ public class MusicPlayerActivity extends BaseActivity implements MediaBrowserFra
 
     @Override
     public void onMediaItemSelected(MediaBrowserCompat.MediaItem item) {
+        int gg = 0;
         if (item != null) {
             Log.i(TAG, "Clicked media ID = " + item.getMediaId());
+
+            if (item.isBrowsable()) {
+                navigateToBrowser(item.getMediaId());
+            }
         }
     }
 }

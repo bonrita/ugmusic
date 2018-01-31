@@ -5,4 +5,5 @@
     <string name="browse_genre_subtitle">Songs by genre</string>
     <string name="browse_by_artists">Artists</string>
     <string name="browse_artists_subtitle">Songs by artists</string>
+    <string name="error_no_connection">Cannot connect to server. Please, check your Internet connectivity.</string>
 </resources>
