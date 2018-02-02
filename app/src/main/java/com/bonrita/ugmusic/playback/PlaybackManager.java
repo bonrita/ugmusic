@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.text.TextUtils;
 
 import com.bonrita.ugmusic.model.MusicProvider;
 import com.bonrita.ugmusic.model.MusicProviderSource;
@@ -61,6 +62,11 @@ public class PlaybackManager implements Playback.Callback {
 
     }
 
+    public void handleStopRequest() {
+        mServiceCallback.onPlaybackStop();
+        mPlayback.stop(true);
+    }
+
     private long getAvailableActions() {
         long actions = PlaybackStateCompat.ACTION_PLAY_PAUSE |
                 PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID |
@@ -93,9 +99,14 @@ public class PlaybackManager implements Playback.Callback {
     private class MediaSessionCallback extends MediaSessionCompat.Callback {
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
+            mServiceCallback.onPlaybackStart();
             MediaMetadataCompat track = mMusicProvider.getMusic(mediaId);
             mPlayback.play(track);
-            int gg = 0;
+        }
+
+        @Override
+        public void onStop() {
+            handleStopRequest();
         }
     }
 }

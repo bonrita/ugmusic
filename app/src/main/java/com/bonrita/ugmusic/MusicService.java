@@ -160,8 +160,14 @@ public class MusicService extends MediaBrowserServiceCompat implements PlaybackM
     }
 
     @Override
-    public void onPlaybackStart() {
+    public void onDestroy() {
+        mPlayBackManager.handleStopRequest();
+        mSession.release();
+    }
 
+    @Override
+    public void onPlaybackStart() {
+        mSession.setActive(true);
     }
 
     @Override
@@ -171,7 +177,7 @@ public class MusicService extends MediaBrowserServiceCompat implements PlaybackM
 
     @Override
     public void onPlaybackStop() {
-
+        mSession.setActive(false);
     }
 
     @Override

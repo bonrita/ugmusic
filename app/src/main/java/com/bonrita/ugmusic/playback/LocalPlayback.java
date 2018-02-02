@@ -5,6 +5,7 @@ import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
+import android.text.TextUtils;
 
 import com.bonrita.ugmusic.MusicService;
 import com.bonrita.ugmusic.model.MusicProvider;
@@ -27,12 +28,15 @@ public class LocalPlayback implements Playback {
     private final MusicProvider mMusicProvider;
     private SimpleExoPlayer mExoplayer;
 
+    private String mCurrentMediaId;
+
     public LocalPlayback(Context context, MusicProvider musicProvider) {
         mContext = context;
         mMusicProvider = musicProvider;
     }
 
     public void play(MediaMetadataCompat track) {
+        String mediaId = track.getDescription().getMediaId();
         String source = track.getString(MusicProviderSource.CUSTOM_METADATA_TRACK_SOURCE);
         if (source != null) {
             // Remove spaces.
@@ -43,11 +47,14 @@ public class LocalPlayback implements Playback {
             mExoplayer = ExoPlayerFactory.newSimpleInstance(mContext, new DefaultTrackSelector());
         }
 
-        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(mContext, Util.getUserAgent(mContext, "ugmusic"));
-        ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-        MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(source), dataSourceFactory, extractorsFactory, null, null);
-        mExoplayer.prepare(mediaSource);
-        mExoplayer.setPlayWhenReady(true);
+        if (!TextUtils.equals(mediaId, mCurrentMediaId)) {
+            mCurrentMediaId = mediaId;
+            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(mContext, Util.getUserAgent(mContext, "ugmusic"));
+            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+            MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(source), dataSourceFactory, extractorsFactory, null, null);
+            mExoplayer.prepare(mediaSource);
+            mExoplayer.setPlayWhenReady(true);
+        }
 
     }
 
@@ -69,7 +76,10 @@ public class LocalPlayback implements Playback {
      */
     @Override
     public void stop(boolean notifyListeners) {
-
+        if (mExoplayer != null) {
+            mExoplayer.release();
+            mExoplayer = null;
+        }
     }
 
     /**
