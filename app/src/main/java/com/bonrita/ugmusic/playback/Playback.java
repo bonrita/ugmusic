@@ -1,5 +1,6 @@
 package com.bonrita.ugmusic.playback;
 
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 
 /**
@@ -54,6 +55,8 @@ public interface Playback {
     void updateLastKnownStreamPosition();
 
     void play(MediaSessionCompat.QueueItem item);
+
+    void play(MediaMetadataCompat track);
 
     void pause();
 

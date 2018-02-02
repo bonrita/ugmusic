@@ -1,11 +1,15 @@
 package com.bonrita.ugmusic.playback;
 
 import android.content.res.Resources;
+import android.os.Bundle;
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
 import com.bonrita.ugmusic.model.MusicProvider;
+import com.bonrita.ugmusic.model.MusicProviderSource;
 import com.bonrita.ugmusic.utils.LogHelper;
+import com.google.android.exoplayer2.ExoPlayerFactory;
 
 /**
  * Manage the interactions among the container service, the queue manager and the actual playback.
@@ -87,5 +91,11 @@ public class PlaybackManager implements Playback.Callback {
     }
 
     private class MediaSessionCallback extends MediaSessionCompat.Callback {
+        @Override
+        public void onPlayFromMediaId(String mediaId, Bundle extras) {
+            MediaMetadataCompat track = mMusicProvider.getMusic(mediaId);
+            mPlayback.play(track);
+            int gg = 0;
+        }
     }
 }

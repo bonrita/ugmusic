@@ -126,12 +126,14 @@ public class MusicPlayerActivity extends BaseActivity implements MediaBrowserFra
 
     @Override
     public void onMediaItemSelected(MediaBrowserCompat.MediaItem item) {
-        int gg = 0;
         if (item != null) {
             Log.i(TAG, "Clicked media ID = " + item.getMediaId());
 
             if (item.isBrowsable()) {
                 navigateToBrowser(item.getMediaId());
+            }else if (item.isPlayable()) {
+                MediaControllerCompat.getMediaController(MusicPlayerActivity.this).getTransportControls()
+                        .playFromMediaId(item.getMediaId(), null);
             }
         }
     }

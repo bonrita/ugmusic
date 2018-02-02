@@ -6,4 +6,6 @@
     <string name="browse_by_artists">Artists</string>
     <string name="browse_artists_subtitle">Songs by artists</string>
     <string name="error_no_connection">Cannot connect to server. Please, check your Internet connectivity.</string>
+    <string name="browse_musics_by_genre_subtitle">%1$s songs</string>
+    <string name="browse_musics_by_artist_subtitle" >%1$s songs</string>
 </resources>

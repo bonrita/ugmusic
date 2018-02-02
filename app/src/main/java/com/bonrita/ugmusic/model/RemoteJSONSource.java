@@ -110,7 +110,7 @@ public class RemoteJSONSource implements MusicProviderSource {
         LogHelper.d(TAG, "Found music track: ", json);
 
         // Media is stored relative to JSON file
-        if (source.startsWith("http")) {
+        if (!source.startsWith("http")) {
             source = basePath + source;
         }
         if (!iconUrl.startsWith("http")) {

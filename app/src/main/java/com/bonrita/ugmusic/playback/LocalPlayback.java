@@ -2,16 +2,53 @@ package com.bonrita.ugmusic.playback;
 
 import android.content.Context;
 import android.media.session.PlaybackState;
+import android.net.Uri;
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 
 import com.bonrita.ugmusic.MusicService;
 import com.bonrita.ugmusic.model.MusicProvider;
+import com.bonrita.ugmusic.model.MusicProviderSource;
 import com.bonrita.ugmusic.utils.LogHelper;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.extractor.ExtractorsFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 
 public class LocalPlayback implements Playback {
     private final static String TAG = LogHelper.makeLogTag(LocalPlayback.class);
+    private final Context mContext;
+    private final MusicProvider mMusicProvider;
+    private SimpleExoPlayer mExoplayer;
 
-    public LocalPlayback(Context context, MusicProvider mMusicProvider) {
+    public LocalPlayback(Context context, MusicProvider musicProvider) {
+        mContext = context;
+        mMusicProvider = musicProvider;
+    }
+
+    public void play(MediaMetadataCompat track) {
+        String source = track.getString(MusicProviderSource.CUSTOM_METADATA_TRACK_SOURCE);
+        if (source != null) {
+            // Remove spaces.
+            source = source.replaceAll(" ", "%20");
+        }
+
+        if (mExoplayer == null) {
+            mExoplayer = ExoPlayerFactory.newSimpleInstance(mContext, new DefaultTrackSelector());
+        }
+
+        DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(mContext, Util.getUserAgent(mContext, "ugmusic"));
+        ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+        MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(source), dataSourceFactory, extractorsFactory, null, null);
+        mExoplayer.prepare(mediaSource);
+        mExoplayer.setPlayWhenReady(true);
+
     }
 
     /**
