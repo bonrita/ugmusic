@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -80,6 +82,13 @@ public class MediaBrowserFragment extends Fragment {
             checkForUserVisibleErrors(true);
         }
     };
+    private android.support.v4.media.session.MediaControllerCompat.Callback mMediaControllerCallback =
+            new MediaControllerCompat.Callback() {
+                @Override
+                public void onPlaybackStateChanged(PlaybackStateCompat state) {
+                    mBrowserAdapter.notifyDataSetChanged();
+                }
+            };
 
 
     /**
@@ -169,6 +178,9 @@ public class MediaBrowserFragment extends Fragment {
             Log.i(TAG, "Un-subscribing Media ID = " + mMediaId);
             mediaBrowser.unsubscribe(mMediaId);
         }
+
+        MediaControllerCompat controller = MediaControllerCompat.getMediaController(getActivity());
+        controller.unregisterCallback(mMediaControllerCallback);
     }
 
     @Override
@@ -188,6 +200,10 @@ public class MediaBrowserFragment extends Fragment {
         Log.i(TAG, "Media ID = " + mMediaId);
         mMediaFragmentListener.getMediaBrowser().unsubscribe(mMediaId);
         mMediaFragmentListener.getMediaBrowser().subscribe(mMediaId, mSubscriptionCallback);
+
+        MediaControllerCompat controller = MediaControllerCompat.getMediaController(getActivity());
+
+        controller.registerCallback(mMediaControllerCallback);
     }
 
     private void checkForUserVisibleErrors(boolean forceError) {

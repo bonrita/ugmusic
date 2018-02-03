@@ -2,6 +2,7 @@ package com.bonrita.ugmusic.playback;
 
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -49,7 +50,17 @@ public class PlaybackManager implements Playback.Callback {
 
     @Override
     public void onPlaybackStatusChanged(int state) {
+        updatePlaybackState(state);
+    }
 
+    public void updatePlaybackState(Integer state) {
+
+        long position = mPlayback.getCurrentStreamPosition();
+        int currentState = mPlayback.getState(state);
+
+        PlaybackStateCompat.Builder newState = new PlaybackStateCompat.Builder()
+                .setState(currentState, position, 1.0f);
+        mServiceCallback.onPlaybackStateUpdated(newState.build());
     }
 
     @Override

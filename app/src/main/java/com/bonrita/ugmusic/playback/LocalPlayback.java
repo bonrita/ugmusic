@@ -3,21 +3,28 @@ package com.bonrita.ugmusic.playback;
 import android.content.Context;
 import android.media.session.PlaybackState;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.TextUtils;
 
-import com.bonrita.ugmusic.MusicService;
 import com.bonrita.ugmusic.model.MusicProvider;
 import com.bonrita.ugmusic.model.MusicProviderSource;
 import com.bonrita.ugmusic.utils.LogHelper;
+import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
@@ -27,8 +34,10 @@ public class LocalPlayback implements Playback {
     private final Context mContext;
     private final MusicProvider mMusicProvider;
     private SimpleExoPlayer mExoplayer;
+    private Playback.Callback mPlaybackCallback;
 
     private String mCurrentMediaId;
+    private ExoPlayerEventListener mEventListener = new ExoPlayerEventListener();
 
     public LocalPlayback(Context context, MusicProvider musicProvider) {
         mContext = context;
@@ -45,6 +54,7 @@ public class LocalPlayback implements Playback {
 
         if (mExoplayer == null) {
             mExoplayer = ExoPlayerFactory.newSimpleInstance(mContext, new DefaultTrackSelector());
+            mExoplayer.addListener(mEventListener);
         }
 
         if (!TextUtils.equals(mediaId, mCurrentMediaId)) {
@@ -96,8 +106,32 @@ public class LocalPlayback implements Playback {
      * Get the current {@link PlaybackState#getState()}
      */
     @Override
-    public int getState() {
-        return 0;
+    public int getState(@Nullable Integer state) {
+        int playbackState;
+
+        if (mExoplayer == null) {
+            return PlaybackStateCompat.STATE_NONE;
+        }
+
+        if (state == null) {
+            state = mExoplayer.getPlaybackState();
+        }
+
+        switch (state) {
+            case Player.STATE_READY:
+                if (mExoplayer.getPlayWhenReady()) {
+                    playbackState = PlaybackStateCompat.STATE_PLAYING;
+                } else {
+                    playbackState = PlaybackStateCompat.STATE_PAUSED;
+                }
+                break;
+
+            default:
+                playbackState = PlaybackStateCompat.STATE_NONE;
+                break;
+        }
+
+        return playbackState;
     }
 
     /**
@@ -122,7 +156,7 @@ public class LocalPlayback implements Playback {
      */
     @Override
     public long getCurrentStreamPosition() {
-        return 0;
+        return mExoplayer != null ? mExoplayer.getCurrentPosition() : 0;
     }
 
     /**
@@ -160,6 +194,48 @@ public class LocalPlayback implements Playback {
 
     @Override
     public void setCallback(Callback callback) {
+        mPlaybackCallback = callback;
+    }
 
+    private class ExoPlayerEventListener implements Player.EventListener {
+        @Override
+        public void onTimelineChanged(Timeline timeline, Object manifest) {
+
+        }
+
+        @Override
+        public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+
+        }
+
+        @Override
+        public void onLoadingChanged(boolean isLoading) {
+
+        }
+
+        @Override
+        public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+            mPlaybackCallback.onPlaybackStatusChanged(playbackState);
+        }
+
+        @Override
+        public void onRepeatModeChanged(int repeatMode) {
+
+        }
+
+        @Override
+        public void onPlayerError(ExoPlaybackException error) {
+
+        }
+
+        @Override
+        public void onPositionDiscontinuity() {
+
+        }
+
+        @Override
+        public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+
+        }
     }
 }

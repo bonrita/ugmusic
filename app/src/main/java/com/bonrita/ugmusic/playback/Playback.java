@@ -1,5 +1,6 @@
 package com.bonrita.ugmusic.playback;
 
+import android.support.annotation.Nullable;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 
@@ -31,7 +32,7 @@ public interface Playback {
     /**
      * Get the current {@link android.media.session.PlaybackState#getState()}
      */
-    int getState();
+    int getState(@Nullable Integer state);
 
     /**
      * @return boolean that indicates that this is ready to be used.

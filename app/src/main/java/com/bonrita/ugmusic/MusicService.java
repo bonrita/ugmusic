@@ -157,6 +157,7 @@ public class MusicService extends MediaBrowserServiceCompat implements PlaybackM
         PendingIntent pi = PendingIntent.getActivity(context, 99, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         mSession.setSessionActivity(pi);
 
+        mPlayBackManager.updatePlaybackState(null);
     }
 
     @Override
@@ -182,6 +183,6 @@ public class MusicService extends MediaBrowserServiceCompat implements PlaybackM
 
     @Override
     public void onPlaybackStateUpdated(PlaybackStateCompat newState) {
-
+        mSession.setPlaybackState(newState);
     }
 }

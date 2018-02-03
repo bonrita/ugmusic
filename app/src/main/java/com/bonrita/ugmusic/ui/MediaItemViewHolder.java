@@ -3,6 +3,8 @@ package com.bonrita.ugmusic.ui;
 
 import android.app.Activity;
 import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -37,6 +39,13 @@ class MediaItemViewHolder {
 
         if (!item.isPlayable()) {
             holder.mImageView.setVisibility(View.GONE);
+        }
+
+        PlaybackStateCompat stateCompat = MediaControllerCompat.getMediaController(context).getPlaybackState();
+
+        int state = stateCompat.getState();
+        if (state == PlaybackStateCompat.STATE_PLAYING) {
+            holder.mImageView.setImageResource(R.drawable.ic_equalizer_black_36dp);
         }
 
         return convertView;
