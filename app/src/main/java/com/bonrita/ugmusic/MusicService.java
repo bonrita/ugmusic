@@ -23,7 +23,7 @@ import com.bonrita.ugmusic.utils.MediaIDHelper;
 
 import java.util.ArrayList;
 import java.util.List;
-
+// https://github.com/googlesamples/android-MediaBrowserService
 public class MusicService extends MediaBrowserServiceCompat implements PlaybackManager.PlaybackServiceCallback {
 
     private static final String TAG = LogHelper.makeLogTag(MusicService.class);
@@ -122,7 +122,7 @@ public class MusicService extends MediaBrowserServiceCompat implements PlaybackM
                 new QueueManager.MetadataUpdateListener() {
                     @Override
                     public void onMetadataChanged(MediaMetadataCompat metadata) {
-
+                        mSession.setMetadata(metadata);
                     }
 
                     @Override

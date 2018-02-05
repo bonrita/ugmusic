@@ -8,12 +8,12 @@ public class MediaIDHelper {
     public static final String MEDIA_ID_EMPTY_ROOT = "__EMPTY_ROOT__";
     public static final String MEDIA_ID_MUSICS_BY_GENRE = "__BY_GENRE__";
     public static final String MEDIA_ID_MUSICS_BY_ARTIST = "__BY_ARTIST__";
+    public static final String MEDIA_ID_MUSICS_BY_PLAYLIST = "__PLAYLIST__";
     public static final String CATEGORY_SEPARATOR = "/";
     public static final String MUSIC_SEPARATOR = "|";
 
     /**
-     *
-     * @param musicID Unique music ID for playable items, or null for browseable items.
+     * @param musicID    Unique music ID for playable items, or null for browseable items.
      * @param categories hierarchy of categories representing this item's browsing parents
      * @return a hierarchy-aware media ID
      */
@@ -49,4 +49,13 @@ public class MediaIDHelper {
         return false;
     }
 
+    public static String getOriginalMediaId(String categoryBasedMediaId) {
+        int pos = categoryBasedMediaId.indexOf(String.valueOf(MediaIDHelper.MUSIC_SEPARATOR));
+
+        if (pos > 0) {
+            return categoryBasedMediaId.substring(pos+1);
+        }
+
+        return null;
+    }
 }

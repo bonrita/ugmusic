@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -12,6 +13,7 @@ import android.text.TextUtils;
 import com.bonrita.ugmusic.model.MusicProvider;
 import com.bonrita.ugmusic.model.MusicProviderSource;
 import com.bonrita.ugmusic.utils.LogHelper;
+import com.bonrita.ugmusic.utils.MediaIDHelper;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -169,6 +171,30 @@ public class LocalPlayback implements Playback {
 
     @Override
     public void play(MediaSessionCompat.QueueItem item) {
+//        MediaDescriptionCompat description = item.getDescription();
+        String mediaId = item.getDescription().getMediaId();
+
+        if (mExoplayer == null) {
+            mExoplayer = ExoPlayerFactory.newSimpleInstance(mContext, new DefaultTrackSelector());
+            mExoplayer.addListener(mEventListener);
+        }
+
+        if (!TextUtils.equals(mediaId, mCurrentMediaId)) {
+            mCurrentMediaId = mediaId;
+            String originalMediaId = MediaIDHelper.getOriginalMediaId(mediaId);
+            MediaMetadataCompat track = mMusicProvider.getMusic(originalMediaId);
+            String source = track.getString(MusicProviderSource.CUSTOM_METADATA_TRACK_SOURCE);
+            if (source != null) {
+                // Remove spaces.
+                source = source.replaceAll(" ", "%20");
+            }
+
+            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(mContext, Util.getUserAgent(mContext, "ugmusic"));
+            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+            MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(source), dataSourceFactory, extractorsFactory, null, null);
+            mExoplayer.prepare(mediaSource);
+            mExoplayer.setPlayWhenReady(true);
+        }
 
     }
 

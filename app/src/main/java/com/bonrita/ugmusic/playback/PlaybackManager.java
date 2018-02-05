@@ -58,8 +58,16 @@ public class PlaybackManager implements Playback.Callback {
         long position = mPlayback.getCurrentStreamPosition();
         int currentState = mPlayback.getState(state);
 
+        MediaSessionCompat.QueueItem currentQueueItem = mQueueManager.getCurrentQueueItem();
+
         PlaybackStateCompat.Builder newState = new PlaybackStateCompat.Builder()
                 .setState(currentState, position, 1.0f);
+
+        if (currentQueueItem != null) {
+            newState.setActiveQueueItemId(currentQueueItem.getQueueId());
+
+        }
+
         mServiceCallback.onPlaybackStateUpdated(newState.build());
     }
 
@@ -110,9 +118,17 @@ public class PlaybackManager implements Playback.Callback {
     private class MediaSessionCallback extends MediaSessionCompat.Callback {
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
-            mServiceCallback.onPlaybackStart();
-            MediaMetadataCompat track = mMusicProvider.getMusic(mediaId);
-            mPlayback.play(track);
+            mQueueManager.setQueueFromMediaId(mediaId);
+
+            MediaSessionCompat.QueueItem queueItem = mQueueManager.getCurrentQueueItem();
+
+            if (queueItem != null) {
+                mServiceCallback.onPlaybackStart();
+                mPlayback.play(queueItem);
+            }
+
+//            MediaMetadataCompat track = mMusicProvider.getMusic(mediaId);
+//            mPlayback.play(track);
         }
 
         @Override

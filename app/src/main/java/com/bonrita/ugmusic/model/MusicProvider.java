@@ -98,7 +98,9 @@ public class MusicProvider {
 
                 while (iterator.hasNext()) {
                     MediaMetadataCompat metadata = iterator.next();
-                    mediaItems.add(createPlayableMediaItems(metadata.getDescription()));
+                    MediaDescriptionCompat description = metadata.getDescription();
+                    MediaBrowserCompat.MediaItem item = createPlayableMediaItem(MEDIA_ID_MUSICS_BY_GENRE, genre, description);
+                    mediaItems.add(item);
                 }
             }
         }
@@ -106,8 +108,19 @@ public class MusicProvider {
         return mediaItems;
     }
 
-    private MediaBrowserCompat.MediaItem createPlayableMediaItems(MediaDescriptionCompat description) {
-        return new MediaBrowserCompat.MediaItem(description, MediaBrowserCompat.MediaItem.FLAG_PLAYABLE);
+    private MediaBrowserCompat.MediaItem createPlayableMediaItem(String baseType, String secondaryType, MediaDescriptionCompat description) {
+        String mediaId = MediaIDHelper.createMediaID(description.getMediaId(), baseType, secondaryType);
+        MediaDescriptionCompat newDescription = new MediaDescriptionCompat.Builder()
+                .setMediaId(mediaId)
+                .setSubtitle(description.getSubtitle())
+                .setTitle(description.getTitle())
+                .setIconUri(description.getIconUri())
+                .setDescription(description.getDescription())
+                .setIconBitmap(description.getIconBitmap())
+                .setMediaUri(description.getMediaUri())
+                .setExtras(description.getExtras())
+                .build();
+        return new MediaBrowserCompat.MediaItem(newDescription, MediaBrowserCompat.MediaItem.FLAG_PLAYABLE);
     }
 
     private MediaBrowserCompat.MediaItem createBrowsableMediaItemForArtists(String artist, Resources resources) {

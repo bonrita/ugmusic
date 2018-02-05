@@ -2,7 +2,11 @@ package com.bonrita.ugmusic.ui;
 
 
 import android.app.Activity;
+import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.View;
@@ -11,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bonrita.ugmusic.R;
+import com.bonrita.ugmusic.utils.MediaIDHelper;
 
 class MediaItemViewHolder {
 
@@ -41,11 +46,19 @@ class MediaItemViewHolder {
             holder.mImageView.setVisibility(View.GONE);
         }
 
-        PlaybackStateCompat stateCompat = MediaControllerCompat.getMediaController(context).getPlaybackState();
+        MediaControllerCompat controller = MediaControllerCompat.getMediaController(context);
+        MediaMetadataCompat metadata = controller.getMetadata();
 
-        int state = stateCompat.getState();
-        if (state == PlaybackStateCompat.STATE_PLAYING) {
-            holder.mImageView.setImageResource(R.drawable.ic_equalizer_black_36dp);
+        if (metadata != null) {
+            String currentMediaId = metadata.getDescription().getMediaId();
+            String viewHolderOriginalId = MediaIDHelper.getOriginalMediaId(item.getMediaId());
+            int state = controller.getPlaybackState().getState();
+
+            if (state == PlaybackStateCompat.STATE_PLAYING && currentMediaId.equals(viewHolderOriginalId)) {
+                holder.mImageView.setImageResource(R.drawable.ic_equalizer_black_36dp);
+            } else {
+                holder.mImageView.setImageResource(R.drawable.ic_play_arrow_black_36dp);
+            }
         }
 
         return convertView;
