@@ -65,7 +65,6 @@ public class PlaybackManager implements Playback.Callback {
 
         if (currentQueueItem != null) {
             newState.setActiveQueueItemId(currentQueueItem.getQueueId());
-
         }
 
         mServiceCallback.onPlaybackStateUpdated(newState.build());
@@ -101,6 +100,19 @@ public class PlaybackManager implements Playback.Callback {
         return actions;
     }
 
+    /**
+     * Handle a request to play a MediaSessionCompat.QueueItem
+     */
+    public void handlePlayRequest() {
+
+        MediaSessionCompat.QueueItem queueItem = mQueueManager.getCurrentQueueItem();
+
+        if (queueItem != null) {
+            mServiceCallback.onPlaybackStart();
+            mPlayback.play(queueItem);
+        }
+    }
+
     public MediaSessionCompat.Callback getMediaSessionCallback() {
         return mMediaSessionCallback;
     }
@@ -116,19 +128,25 @@ public class PlaybackManager implements Playback.Callback {
     }
 
     private class MediaSessionCallback extends MediaSessionCompat.Callback {
+
+        @Override
+        public void onPlay() {
+            handlePlayRequest();
+        }
+
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
             mQueueManager.setQueueFromMediaId(mediaId);
+            handlePlayRequest();
+        }
 
+        @Override
+        public void onPause() {
             MediaSessionCompat.QueueItem queueItem = mQueueManager.getCurrentQueueItem();
 
             if (queueItem != null) {
-                mServiceCallback.onPlaybackStart();
-                mPlayback.play(queueItem);
+                mPlayback.pause();
             }
-
-//            MediaMetadataCompat track = mMusicProvider.getMusic(mediaId);
-//            mPlayback.play(track);
         }
 
         @Override

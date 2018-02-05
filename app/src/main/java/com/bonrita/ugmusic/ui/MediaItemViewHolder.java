@@ -2,9 +2,13 @@ package com.bonrita.ugmusic.ui;
 
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.DrawableWrapper;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -23,7 +27,14 @@ class MediaItemViewHolder {
     private TextView mTitle;
     private TextView mDescription;
 
+    private static ColorStateList sColorStatePlaying;
+    private static ColorStateList sColorStateNotPlaying;
+
     public static View setupListView(Activity context, View convertView, ViewGroup parent, MediaBrowserCompat.MediaItem item) {
+
+        if (sColorStatePlaying == null || sColorStateNotPlaying == null) {
+            initializeColorStateLists(context);
+        }
 
         MediaItemViewHolder holder;
 
@@ -55,13 +66,29 @@ class MediaItemViewHolder {
             int state = controller.getPlaybackState().getState();
 
             if (state == PlaybackStateCompat.STATE_PLAYING && currentMediaId.equals(viewHolderOriginalId)) {
-                holder.mImageView.setImageResource(R.drawable.ic_equalizer_black_36dp);
+                AnimationDrawable animation = (AnimationDrawable)
+                        ContextCompat.getDrawable(context, R.drawable.ic_equalizer_white_36dp);
+                DrawableCompat.setTintList(animation, sColorStatePlaying);
+                animation.start();
+                holder.mImageView.setImageDrawable(animation);
+            } else if (state == PlaybackStateCompat.STATE_PAUSED && currentMediaId.equals(viewHolderOriginalId)) {
+                Drawable playDrawable = ContextCompat.getDrawable(context,
+                        R.drawable.ic_equalizer1_white_36dp);
+                DrawableCompat.setTintList(playDrawable, sColorStateNotPlaying);
+                holder.mImageView.setImageDrawable(playDrawable);
             } else {
                 holder.mImageView.setImageResource(R.drawable.ic_play_arrow_black_36dp);
             }
         }
 
         return convertView;
+    }
+
+    private static void initializeColorStateLists(Context ctx) {
+        sColorStateNotPlaying = ColorStateList.valueOf(ctx.getResources()
+                .getColor(R.color.media_item_icon_not_playing));
+        sColorStatePlaying = ColorStateList.valueOf(ctx.getResources()
+                .getColor(R.color.media_item_icon_playing));
     }
 
 

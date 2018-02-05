@@ -46,30 +46,6 @@ public class LocalPlayback implements Playback {
         mMusicProvider = musicProvider;
     }
 
-    public void play(MediaMetadataCompat track) {
-        String mediaId = track.getDescription().getMediaId();
-        String source = track.getString(MusicProviderSource.CUSTOM_METADATA_TRACK_SOURCE);
-        if (source != null) {
-            // Remove spaces.
-            source = source.replaceAll(" ", "%20");
-        }
-
-        if (mExoplayer == null) {
-            mExoplayer = ExoPlayerFactory.newSimpleInstance(mContext, new DefaultTrackSelector());
-            mExoplayer.addListener(mEventListener);
-        }
-
-        if (!TextUtils.equals(mediaId, mCurrentMediaId)) {
-            mCurrentMediaId = mediaId;
-            DataSource.Factory dataSourceFactory = new DefaultDataSourceFactory(mContext, Util.getUserAgent(mContext, "ugmusic"));
-            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-            MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(source), dataSourceFactory, extractorsFactory, null, null);
-            mExoplayer.prepare(mediaSource);
-            mExoplayer.setPlayWhenReady(true);
-        }
-
-    }
-
     /**
      * Start/setup the playback.
      * Resources/listeners would be allocated by implementations.
@@ -171,7 +147,6 @@ public class LocalPlayback implements Playback {
 
     @Override
     public void play(MediaSessionCompat.QueueItem item) {
-//        MediaDescriptionCompat description = item.getDescription();
         String mediaId = item.getDescription().getMediaId();
 
         if (mExoplayer == null) {
@@ -193,6 +168,10 @@ public class LocalPlayback implements Playback {
             ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
             MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(source), dataSourceFactory, extractorsFactory, null, null);
             mExoplayer.prepare(mediaSource);
+
+        }
+
+        if (mCurrentMediaId != null) {
             mExoplayer.setPlayWhenReady(true);
         }
 
@@ -200,7 +179,9 @@ public class LocalPlayback implements Playback {
 
     @Override
     public void pause() {
-
+        if (mExoplayer != null && getState(null) == PlaybackStateCompat.STATE_PLAYING) {
+            mExoplayer.setPlayWhenReady(false);
+        }
     }
 
     @Override

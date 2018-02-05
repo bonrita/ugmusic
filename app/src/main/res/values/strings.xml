@@ -8,4 +8,8 @@
     <string name="error_no_connection">Cannot connect to server. Please, check your Internet connectivity.</string>
     <string name="browse_musics_by_genre_subtitle">%1$s songs</string>
     <string name="browse_musics_by_artist_subtitle" >%1$s songs</string>
+    <string name="currently_playing_song">Song currently playing</string>
+    <string name="currently_playing_extra_info">Extra info for currently playing song</string>
+    <string name="currently_playing_artist">Artist of currently playing song</string>
+    <string name="play_pause">play or pause</string>
 </resources>

@@ -57,8 +57,6 @@ public interface Playback {
 
     void play(MediaSessionCompat.QueueItem item);
 
-    void play(MediaMetadataCompat track);
-
     void pause();
 
     void seekTo(long position);
