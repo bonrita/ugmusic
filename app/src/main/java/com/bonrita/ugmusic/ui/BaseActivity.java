@@ -1,6 +1,5 @@
 package com.bonrita.ugmusic.ui;
 
-import android.app.Fragment;
 import android.content.ComponentName;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -25,6 +24,11 @@ public abstract class BaseActivity extends AppCompatActivity implements MediaBro
 
     private MediaBrowserCompat mMediaBrowser;
     private PlaybackControlsFragment mControlsFragment;
+
+    long mCurrentQueueItemId = -1;
+    int mCurrentPlaybackState;
+    boolean mControllPlaybackVisibility;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,11 +75,11 @@ public abstract class BaseActivity extends AppCompatActivity implements MediaBro
         MediaControllerCompat.setMediaController(this, mediaController);
         mediaController.registerCallback(mMediaControllerCallback);
 
-        if (shouldShowControls()) {
-            showPlaybackControls();
-        } else {
-            hidePlaybackControls();
-        }
+//        if (shouldShowControls()) {
+//            showPlaybackControls();
+//        } else {
+//            hidePlaybackControls();
+//        }
 
         onMediaControllerConnected();
     }
@@ -137,10 +141,15 @@ public abstract class BaseActivity extends AppCompatActivity implements MediaBro
             new MediaControllerCompat.Callback() {
                 @Override
                 public void onPlaybackStateChanged(PlaybackStateCompat state) {
-                    if (shouldShowControls()) {
-                        showPlaybackControls();
-                    } else {
-                        hidePlaybackControls();
+
+                    if (!mControllPlaybackVisibility) {
+
+                        if (shouldShowControls()) {
+                            mControllPlaybackVisibility = true;
+                            showPlaybackControls();
+                        } else {
+                            hidePlaybackControls();
+                        }
                     }
                 }
             };

@@ -221,6 +221,16 @@ public class LocalPlayback implements Playback {
         }
 
         @Override
+        public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
+        }
+
+        @Override
+        public void onPositionDiscontinuity(int reason) {
+
+        }
+
+        @Override
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
             mPlaybackCallback.onPlaybackStatusChanged(playbackState);
         }
@@ -236,7 +246,7 @@ public class LocalPlayback implements Playback {
         }
 
         @Override
-        public void onPositionDiscontinuity() {
+        public void onSeekProcessed() {
 
         }
 

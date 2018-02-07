@@ -1,11 +1,14 @@
 package com.bonrita.ugmusic.ui;
 
+import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +27,7 @@ public class PlaybackControlsFragment extends android.app.Fragment {
     private TextView mArtist;
     private TextView mExtraInfo;
     private ImageButton mPlayPause;
+    private boolean mControllerConnected;
 
     @Nullable
     @Override
@@ -45,12 +49,6 @@ public class PlaybackControlsFragment extends android.app.Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        MediaControllerCompat controller = MediaControllerCompat.getMediaController(getActivity());
-
-        if (controller != null) {
-            onConnected();
-        }
-
     }
 
     @Override
@@ -63,12 +61,99 @@ public class PlaybackControlsFragment extends android.app.Fragment {
         }
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+    }
+
+    @Override
+    public void onInflate(Context context, AttributeSet attrs, Bundle savedInstanceState) {
+        super.onInflate(context, attrs, savedInstanceState);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+
+    @Override
+    public LayoutInflater onGetLayoutInflater(Bundle savedInstanceState) {
+        return super.onGetLayoutInflater(savedInstanceState);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+    }
+
+    @Override
+    public void onAttachFragment(android.app.Fragment childFragment) {
+        super.onAttachFragment(childFragment);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        MediaControllerCompat controller = MediaControllerCompat.getMediaController(getActivity());
+
+        if (controller != null && !mControllerConnected) {
+            onConnected();
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+    }
+
     private void onConnected() {
         MediaControllerCompat controller = MediaControllerCompat.getMediaController(getActivity());
 
         onPlaybackStateChanged(controller.getPlaybackState());
         onMetadataChanged(controller.getMetadata());
         controller.registerCallback(mControllerCallback);
+        mControllerConnected = true;
     }
 
     private void onPlaybackStateChanged(PlaybackStateCompat playbackState) {
@@ -87,7 +172,7 @@ public class PlaybackControlsFragment extends android.app.Fragment {
             return;
         }
         mTitle.setText(metadata.getDescription().getTitle());
-        mExtraInfo.setText(metadata.getDescription().getSubtitle());
+        mArtist.setText(metadata.getDescription().getSubtitle());
     }
 
     private final View.OnClickListener mButtonListener = new View.OnClickListener() {
@@ -99,6 +184,7 @@ public class PlaybackControlsFragment extends android.app.Fragment {
             switch (v.getId()) {
                 case R.id.play_pause:
                     if (playBackState != null) {
+                        onMetadataChanged(controller.getMetadata());
                         if (playBackState.getState() == PlaybackStateCompat.STATE_PLAYING) {
                             controller.getTransportControls().pause();
                         } else if (playBackState.getState() == PlaybackStateCompat.STATE_PAUSED) {
