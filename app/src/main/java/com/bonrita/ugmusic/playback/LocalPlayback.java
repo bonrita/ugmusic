@@ -186,7 +186,9 @@ public class LocalPlayback implements Playback {
 
     @Override
     public void seekTo(long position) {
-
+        if (mExoplayer != null) {
+            mExoplayer.seekTo(position);
+        }
     }
 
     @Override

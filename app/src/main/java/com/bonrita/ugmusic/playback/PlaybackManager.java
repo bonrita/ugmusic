@@ -61,6 +61,7 @@ public class PlaybackManager implements Playback.Callback {
         MediaSessionCompat.QueueItem currentQueueItem = mQueueManager.getCurrentQueueItem();
 
         PlaybackStateCompat.Builder newState = new PlaybackStateCompat.Builder()
+                .setActions(getAvailableActions())
                 .setState(currentState, position, 1.0f);
 
         if (currentQueueItem != null) {
@@ -152,6 +153,23 @@ public class PlaybackManager implements Playback.Callback {
         @Override
         public void onStop() {
             handleStopRequest();
+        }
+
+        @Override
+        public void onSkipToNext() {
+            mQueueManager.skipQueuePosition(1);
+            handlePlayRequest();
+        }
+
+        @Override
+        public void onSkipToPrevious() {
+            mQueueManager.skipQueuePosition(-1);
+            handlePlayRequest();
+        }
+
+        @Override
+        public void onSeekTo(long pos) {
+            mPlayback.seekTo(pos);
         }
     }
 }

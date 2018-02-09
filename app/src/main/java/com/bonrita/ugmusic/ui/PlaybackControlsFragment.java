@@ -1,13 +1,14 @@
 package com.bonrita.ugmusic.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,9 +19,14 @@ import android.widget.TextView;
 
 import com.bonrita.ugmusic.R;
 import com.bonrita.ugmusic.utils.LogHelper;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
 public class PlaybackControlsFragment extends android.app.Fragment {
     private static final String TAG = LogHelper.makeLogTag(PlaybackControlsFragment.class);
+
+    private static final int MAX_ART_WIDTH_ICON = 128;  // pixels
+    private static final int MAX_ART_HEIGHT_ICON = 128;  // pixels
 
     private ImageView mAlbumArt;
     private TextView mTitle;
@@ -28,6 +34,8 @@ public class PlaybackControlsFragment extends android.app.Fragment {
     private TextView mExtraInfo;
     private ImageButton mPlayPause;
     private boolean mControllerConnected;
+
+    private String mArtUrl;
 
     @Nullable
     @Override
@@ -42,6 +50,8 @@ public class PlaybackControlsFragment extends android.app.Fragment {
         mPlayPause = (ImageButton) rootView.findViewById(R.id.play_pause);
         mPlayPause.setOnClickListener(mButtonListener);
 
+        // Navigate to the full screen activity.
+        navigateToFullScreenActivity(rootView);
 
         return rootView;
     }
@@ -173,6 +183,43 @@ public class PlaybackControlsFragment extends android.app.Fragment {
         }
         mTitle.setText(metadata.getDescription().getTitle());
         mArtist.setText(metadata.getDescription().getSubtitle());
+
+        String artUrl = null;
+        if (metadata.getDescription().getIconUri() != null) {
+            artUrl = metadata.getDescription().getIconUri().toString();
+        }
+
+        if (!TextUtils.equals(mArtUrl, artUrl)) {
+            mArtUrl = artUrl;
+
+            RequestOptions requestOptions = new RequestOptions()
+                    .override(MAX_ART_WIDTH_ICON, MAX_ART_HEIGHT_ICON);
+
+            Glide.with(PlaybackControlsFragment.this)
+                    .load(artUrl)
+                    .apply(requestOptions)
+                    .into(mAlbumArt);
+        }
+
+    }
+
+    private void navigateToFullScreenActivity(View rootView) {
+        rootView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), FullScreenPlayerActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+                MediaControllerCompat controller = MediaControllerCompat.getMediaController(getActivity());
+                MediaMetadataCompat metadata = controller.getMetadata();
+
+                if (metadata != null) {
+                    intent.putExtra(MusicPlayerActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION, metadata.getDescription());
+                }
+
+                startActivity(intent);
+            }
+        });
     }
 
     private final View.OnClickListener mButtonListener = new View.OnClickListener() {

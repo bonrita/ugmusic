@@ -66,10 +66,23 @@ public class QueueManager {
             setCurrentPlayingQueue(mediaId);
         }
 
-        metaDataChanged();
+        updateMetadata();
     }
 
-    private void metaDataChanged() {
+    public void skipQueuePosition(int amount) {
+        int index = mCurrentIndex + amount;
+
+        if (index < 0) {
+            index = mPlayingQueue.size() - 1;
+        } else if (index > (mPlayingQueue.size() - 1)) {
+            index = 0;
+        }
+
+        mCurrentIndex = index;
+        updateMetadata();
+    }
+
+    private void updateMetadata() {
         if (isIndexPlayable(mCurrentIndex, mPlayingQueue)) {
             MediaSessionCompat.QueueItem item = mPlayingQueue.get(mCurrentIndex);
             String mediaId = item.getDescription().getMediaId();

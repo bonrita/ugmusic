@@ -40,6 +40,8 @@ public class MusicPlayerActivity extends BaseActivity implements MediaBrowserFra
     private static final String TAG = LogHelper.makeLogTag(MusicPlayerActivity.class);
     private static final String FRAGMENT_TAG = "ugmp_list_container";
     private static final String SAVED_MEDIA_ID = "com.bonrita.ugmusic.MEDIA_ID";
+    public static final String EXTRA_CURRENT_MEDIA_DESCRIPTION = "com.bonrita.ugmusic.CURRENT_MEDIA_DESCRIPTION";
+
     private Bundle mVoiceSearchParams;
 
     @Override

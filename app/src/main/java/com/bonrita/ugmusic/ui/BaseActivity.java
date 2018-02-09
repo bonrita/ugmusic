@@ -62,6 +62,11 @@ public abstract class BaseActivity extends AppCompatActivity implements MediaBro
         super.onStop();
         LogHelper.d(TAG, "Activity onStop");
         mMediaBrowser.disconnect();
+
+        MediaControllerCompat controllerCompat = MediaControllerCompat.getMediaController(this);
+        if (controllerCompat != null) {
+            controllerCompat.unregisterCallback(mMediaControllerCallback);
+        }
     }
 
     @Override
