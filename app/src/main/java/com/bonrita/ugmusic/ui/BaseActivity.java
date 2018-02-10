@@ -25,9 +25,7 @@ public abstract class BaseActivity extends AppCompatActivity implements MediaBro
     private MediaBrowserCompat mMediaBrowser;
     private PlaybackControlsFragment mControlsFragment;
 
-    long mCurrentQueueItemId = -1;
-    int mCurrentPlaybackState;
-    boolean mControllPlaybackVisibility;
+    boolean mControlPlaybackVisibility;
 
 
     @Override
@@ -54,6 +52,11 @@ public abstract class BaseActivity extends AppCompatActivity implements MediaBro
 
         hidePlaybackControls();
 
+        MediaControllerCompat controller = MediaControllerCompat.getMediaController(this);
+        if (controller != null) {
+            showPlaybackControls();
+        }
+
         mMediaBrowser.connect();
     }
 
@@ -61,12 +64,13 @@ public abstract class BaseActivity extends AppCompatActivity implements MediaBro
     protected void onStop() {
         super.onStop();
         LogHelper.d(TAG, "Activity onStop");
-        mMediaBrowser.disconnect();
 
         MediaControllerCompat controllerCompat = MediaControllerCompat.getMediaController(this);
         if (controllerCompat != null) {
             controllerCompat.unregisterCallback(mMediaControllerCallback);
         }
+
+        mMediaBrowser.disconnect();
     }
 
     @Override
@@ -79,13 +83,7 @@ public abstract class BaseActivity extends AppCompatActivity implements MediaBro
         MediaControllerCompat mediaController = new MediaControllerCompat(this, token);
         MediaControllerCompat.setMediaController(this, mediaController);
         mediaController.registerCallback(mMediaControllerCallback);
-
-//        if (shouldShowControls()) {
-//            showPlaybackControls();
-//        } else {
-//            hidePlaybackControls();
-//        }
-
+        
         onMediaControllerConnected();
     }
 
@@ -147,10 +145,10 @@ public abstract class BaseActivity extends AppCompatActivity implements MediaBro
                 @Override
                 public void onPlaybackStateChanged(PlaybackStateCompat state) {
 
-                    if (!mControllPlaybackVisibility) {
+                    if (!mControlPlaybackVisibility) {
 
                         if (shouldShowControls()) {
-                            mControllPlaybackVisibility = true;
+                            mControlPlaybackVisibility = true;
                             showPlaybackControls();
                         } else {
                             hidePlaybackControls();

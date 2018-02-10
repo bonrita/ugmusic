@@ -59,6 +59,10 @@ public class PlaybackControlsFragment extends android.app.Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        MediaControllerCompat controller = MediaControllerCompat.getMediaController(getActivity());
+        if (controller != null) {
+            onConnected();
+        }
     }
 
     @Override
@@ -157,7 +161,7 @@ public class PlaybackControlsFragment extends android.app.Fragment {
         super.onDestroyView();
     }
 
-    private void onConnected() {
+    public void onConnected() {
         MediaControllerCompat controller = MediaControllerCompat.getMediaController(getActivity());
 
         onPlaybackStateChanged(controller.getPlaybackState());
