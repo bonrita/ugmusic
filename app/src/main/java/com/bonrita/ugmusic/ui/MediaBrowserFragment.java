@@ -12,6 +12,8 @@ import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,7 +26,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bonrita.ugmusic.R;
+import com.bonrita.ugmusic.adapter.VerticalRecyclerAdapter;
+import com.bonrita.ugmusic.model.MusicProvider;
 import com.bonrita.ugmusic.utils.LogHelper;
+import com.bonrita.ugmusic.utils.MediaIDHelper;
 import com.bonrita.ugmusic.utils.NetworkHelper;
 
 import java.util.ArrayList;
@@ -50,6 +55,10 @@ public class MediaBrowserFragment extends Fragment {
     private TextView mErrorMessage;
     private View mErrorView;
 
+    protected ListView mListView;
+    RecyclerView mRecyclerView;
+    View mRootView;
+
     private ArrayAdapter<MediaBrowserCompat.MediaItem> mBrowserAdapter;
 
     private MediaBrowserProvider mMediaBrowserProvider;
@@ -61,11 +70,23 @@ public class MediaBrowserFragment extends Fragment {
             super.onChildrenLoaded(parentId, children);
             Log.i(TAG, "Number of items loaded = " + children.size() + " from parentId = " + parentId);
             checkForUserVisibleErrors(children.isEmpty());
+
+            if (parentId.equals(MediaIDHelper.MEDIA_ID_ROOT)) {
+//                MusicProvider musicProvider = new MusicProvider();
+                VerticalRecyclerAdapter adapter = new VerticalRecyclerAdapter(children);
+                mRecyclerView.setAdapter(adapter);
+
+                mRecyclerView.setVisibility(View.VISIBLE);
+                adapter.notifyDataSetChanged();
+            }
+
+
             mBrowserAdapter.clear();
             for (MediaBrowserCompat.MediaItem item : children) {
                 mBrowserAdapter.add(item);
             }
             mBrowserAdapter.notifyDataSetChanged();
+//            mListView.setVisibility(View.VISIBLE);
         }
 
         /**
@@ -117,17 +138,18 @@ public class MediaBrowserFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         Log.i(TAG, "OnCreateView called");
-        View rootView = inflater.inflate(R.layout.fragment_list, container, false);
+        mRootView = inflater.inflate(R.layout.fragment_list, container, false);
 
-        mErrorView = rootView.findViewById(R.id.playback_error);
+        mErrorView = mRootView.findViewById(R.id.playback_error);
         mErrorMessage = mErrorView.findViewById(R.id.error_message);
 
         checkForUserVisibleErrors(false);
 
         mBrowserAdapter = new BrowserAdapter(getActivity());
-        ListView listView = (ListView) rootView.findViewById(R.id.list_view);
-        listView.setAdapter(mBrowserAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//        ListView listView = (ListView) rootView.findViewById(R.id.list_view);
+        mListView = (ListView) mRootView.findViewById(R.id.list_view);
+        mListView.setAdapter(mBrowserAdapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 checkForUserVisibleErrors(false);
@@ -136,7 +158,15 @@ public class MediaBrowserFragment extends Fragment {
             }
         });
 
-        return rootView;
+        mListView.setVisibility(View.GONE);
+
+        mRecyclerView = (RecyclerView) mRootView.findViewById(R.id.recycler_view);
+        mRecyclerView.setHasFixedSize(false);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setVisibility(View.GONE);
+
+        return mRootView;
     }
 
     /**

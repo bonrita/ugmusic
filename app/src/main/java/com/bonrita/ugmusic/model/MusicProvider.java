@@ -34,6 +34,7 @@ public class MusicProvider {
     private static final String TAG = LogHelper.makeLogTag(MusicProvider.class);
 
     private MusicProviderSource mSource;
+    private static MusicProvider mMusicProvider;
 
     // Categorised caches for music track data:
     private ConcurrentMap<String, List<MediaMetadataCompat>> mMusicListByGenre;
@@ -48,15 +49,22 @@ public class MusicProvider {
 
     private volatile State mCurrentState = State.NON_INITIALIZED;
 
-    public MusicProvider() {
+    private MusicProvider() {
         this(new RemoteJSONSource());
     }
 
-    public MusicProvider(MusicProviderSource source) {
+    private MusicProvider(MusicProviderSource source) {
         mSource = source;
         mMusicListByGenre = new ConcurrentHashMap<>();
         mMusicListById = new ConcurrentHashMap<>();
         mFavoriteTracks = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+    }
+
+    public static MusicProvider getInstance(){
+        if(mMusicProvider == null){
+            mMusicProvider = new MusicProvider();
+        }
+        return mMusicProvider;
     }
 
     public boolean isInitialized() {
