@@ -9,6 +9,7 @@ import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.bonrita.ugmusic.R;
 
@@ -20,6 +21,7 @@ public class VerticalRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
     private List<MediaBrowserCompat.MediaItem> mList;
     private HorizontalRecyclerAdapter.OnItemClickListener mItemClickListener;
     private SparseIntArray mListPosition = new SparseIntArray();
+    private TextView mTitle;
 
     public VerticalRecyclerAdapter(List<MediaBrowserCompat.MediaItem> list) {
         mList = list;
@@ -34,6 +36,7 @@ public class VerticalRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        mTitle.setText(mList.get(position).getDescription().getTitle());
         CellViewHolder cellViewHolder = (CellViewHolder) holder;
 
         cellViewHolder.mRecyclerView.setHasFixedSize(true);
@@ -80,6 +83,7 @@ public class VerticalRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
             super(itemView);
 
             mRecyclerView = (RecyclerView) itemView.findViewById(R.id.recyclerView);
+            mTitle = (TextView) itemView.findViewById(R.id.title);
         }
     }
 
