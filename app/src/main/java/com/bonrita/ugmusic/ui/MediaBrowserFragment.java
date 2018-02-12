@@ -72,21 +72,24 @@ public class MediaBrowserFragment extends Fragment {
             checkForUserVisibleErrors(children.isEmpty());
 
             if (parentId.equals(MediaIDHelper.MEDIA_ID_ROOT)) {
-//                MusicProvider musicProvider = new MusicProvider();
+                mListView.setVisibility(View.GONE);
+
                 VerticalRecyclerAdapter adapter = new VerticalRecyclerAdapter(children);
                 mRecyclerView.setAdapter(adapter);
 
                 mRecyclerView.setVisibility(View.VISIBLE);
                 adapter.notifyDataSetChanged();
+
+            } else {
+                mRecyclerView.setVisibility(View.GONE);
+                mBrowserAdapter.clear();
+                for (MediaBrowserCompat.MediaItem item : children) {
+                    mBrowserAdapter.add(item);
+                }
+                mBrowserAdapter.notifyDataSetChanged();
+                mListView.setVisibility(View.VISIBLE);
             }
 
-
-            mBrowserAdapter.clear();
-            for (MediaBrowserCompat.MediaItem item : children) {
-                mBrowserAdapter.add(item);
-            }
-            mBrowserAdapter.notifyDataSetChanged();
-//            mListView.setVisibility(View.VISIBLE);
         }
 
         /**
@@ -297,7 +300,7 @@ public class MediaBrowserFragment extends Fragment {
     public void onConnected() {
         mMediaId = getMediaId();
 
-        if (mMediaId == null){
+        if (mMediaId == null) {
             mMediaId = mMediaFragmentListener.getMediaBrowser().getRoot();
         }
 

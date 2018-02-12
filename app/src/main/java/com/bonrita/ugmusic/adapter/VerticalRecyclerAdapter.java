@@ -26,10 +26,8 @@ public class VerticalRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent,
-
-
-                                                      int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        mContext = parent.getContext();
         View v1 = LayoutInflater.from(parent.getContext()).inflate(R.layout.detail_list_item_vertical, parent, false);
         return new CellViewHolder(v1);
     }

@@ -11,7 +11,6 @@ import android.widget.TextView;
 import com.bonrita.ugmusic.R;
 import com.bonrita.ugmusic.model.MusicProvider;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
